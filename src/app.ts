@@ -23,23 +23,32 @@ const createApp = (): Application => {
   );
 
   // ─── CORS ────────────────────────────────────────────────────────────
-  const allowedOrigins = env.isProd()
-    ? (process.env.ALLOWED_ORIGINS ?? "").split(",").map((o) => o.trim()).filter(Boolean)
+  const defaultOrigins = env.isProd()
+    ? ["https://chess-fronthend.vercel.app"]
     : ["http://localhost:3000", "http://localhost:3001"];
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (e.g., Postman, mobile)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`CORS: Origin '${origin}' not allowed`));
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    })
-  );
+  const configuredOrigins = (process.env.ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+  const allowAllOrigins = env.isProd() && (!process.env.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS.includes("*"));
+
+  const corsOptions = {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (e.g., Postman, mobile)
+      if (!origin) return callback(null, true);
+      if (allowAllOrigins || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  };
+
+  app.use(cors(corsOptions));
+  app.options("*", cors(corsOptions));
 
   // ─── Request Parsing ─────────────────────────────────────────────────
   app.use(express.json({ limit: "10kb" }));
@@ -72,3 +81,4 @@ const createApp = (): Application => {
 };
 
 export default createApp;
+8
