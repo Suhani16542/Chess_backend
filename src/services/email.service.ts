@@ -32,8 +32,26 @@ const sendEmail = async (
     logger.info(`[EmailService] Email sent successfully. MessageId: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (err) {
-    const error = err as Error;
-    logger.error(`[EmailService] SMTP error: ${error.message}`, err);
+    const error = err as Error & {
+      code?: string;
+      command?: string;
+      response?: unknown;
+      responseCode?: number;
+    };
+
+    const responseCode = error.responseCode ?? "n/a";
+    const responseMessage =
+      typeof error.response === "string"
+        ? error.response
+        : error.response
+          ? JSON.stringify(error.response)
+          : "n/a";
+
+    logger.error(
+      `[EmailService] SMTP sendMail failed. code: ${error.code ?? "unknown"} | command: ${error.command ?? "unknown"} | responseCode: ${responseCode} | response: ${responseMessage}`,
+      err
+    );
+
     return { success: false, error: error.message };
   }
 };

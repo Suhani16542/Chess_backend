@@ -2,8 +2,12 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 import { logger } from "./logger";
 
-const secureMode = env.SMTP_SECURE || env.SMTP_PORT === 465;
-const requireTls = env.SMTP_REQUIRE_TLS || env.SMTP_PORT === 587;
+const secureMode = false;
+const requireTls = true;
+const ignoreTls = false;
+const connectionTimeout = 10000;
+const greetingTimeout = 10000;
+const socketTimeout = 15000;
 
 export const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
@@ -13,10 +17,11 @@ export const transporter = nodemailer.createTransport({
     user: env.SMTP_USER,
     pass: env.SMTP_PASS,
   },
-  connectionTimeout: env.SMTP_CONNECTION_TIMEOUT,
-  greetingTimeout: env.SMTP_GREETING_TIMEOUT,
-  socketTimeout: env.SMTP_SOCKET_TIMEOUT,
+  connectionTimeout,
+  greetingTimeout,
+  socketTimeout,
   requireTLS: requireTls,
+  ignoreTLS: ignoreTls,
   tls: {
     rejectUnauthorized: env.SMTP_REJECT_UNAUTHORIZED,
   },

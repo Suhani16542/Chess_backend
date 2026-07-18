@@ -44,7 +44,7 @@ export const env = {
   SMTP_REJECT_UNAUTHORIZED: getBooleanEnv("SMTP_REJECT_UNAUTHORIZED", true),
   SMTP_CONNECTION_TIMEOUT: getNumberEnv("SMTP_CONNECTION_TIMEOUT", 10000),
   SMTP_GREETING_TIMEOUT: getNumberEnv("SMTP_GREETING_TIMEOUT", 10000),
-  SMTP_SOCKET_TIMEOUT: getNumberEnv("SMTP_SOCKET_TIMEOUT", 20000),
+  SMTP_SOCKET_TIMEOUT: getNumberEnv("SMTP_SOCKET_TIMEOUT", 15000),
   isDev(): boolean {
     return this.NODE_ENV === "development";
   },
