@@ -15,6 +15,8 @@ import apiRoutes from "./routes/index";
 const createApp = (): Application => {
   const app: Application = express();
 
+  app.set("trust proxy", 1);
+
   // ─── Security ───────────────────────────────────────────────────────
   app.use(
     helmet({

@@ -11,6 +11,25 @@ const getEnv = (key: string, required = true): string => {
   return value ?? "";
 };
 
+const getBooleanEnv = (key: string, fallback = false): boolean => {
+  const value = process.env[key];
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  return ["true", "1", "yes", "on"].includes(value.toLowerCase());
+};
+
+const getNumberEnv = (key: string, fallback: number): number => {
+  const value = process.env[key];
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
 export const env = {
   PORT: parseInt(getEnv("PORT", false) || "5000", 10),
   MONGODB_URI: getEnv("MONGODB_URI"),
@@ -20,6 +39,12 @@ export const env = {
   SMTP_PASS: getEnv("SMTP_PASS"),
   ACADEMY_EMAIL: getEnv("ACADEMY_EMAIL"),
   NODE_ENV: getEnv("NODE_ENV", false) || "development",
+  SMTP_SECURE: getBooleanEnv("SMTP_SECURE", false),
+  SMTP_REQUIRE_TLS: getBooleanEnv("SMTP_REQUIRE_TLS", false),
+  SMTP_REJECT_UNAUTHORIZED: getBooleanEnv("SMTP_REJECT_UNAUTHORIZED", true),
+  SMTP_CONNECTION_TIMEOUT: getNumberEnv("SMTP_CONNECTION_TIMEOUT", 10000),
+  SMTP_GREETING_TIMEOUT: getNumberEnv("SMTP_GREETING_TIMEOUT", 10000),
+  SMTP_SOCKET_TIMEOUT: getNumberEnv("SMTP_SOCKET_TIMEOUT", 20000),
   isDev(): boolean {
     return this.NODE_ENV === "development";
   },

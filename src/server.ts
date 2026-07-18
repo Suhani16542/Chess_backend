@@ -2,6 +2,7 @@ import { env } from "./config/env";
 import { connectDB, disconnectDB } from "./config/db";
 import { logger } from "./config/logger";
 import createApp from "./app";
+import { verifySmtpConnection } from "./config/nodemailer";
 
 const startServer = async (): Promise<void> => {
   // Validate env variables before anything else
@@ -9,6 +10,15 @@ const startServer = async (): Promise<void> => {
 
   // Connect to MongoDB
   await connectDB();
+
+  logger.info(
+    `[SMTP] Preparing verification. Host: ${env.SMTP_HOST}; Port: ${env.SMTP_PORT}; Secure: ${String(env.SMTP_SECURE || env.SMTP_PORT === 465)}; NodeEnv: ${env.NODE_ENV}`
+  );
+
+  const smtpReady = await verifySmtpConnection();
+  if (!smtpReady) {
+    logger.warn("SMTP verification failed. Email delivery may be unavailable until the SMTP configuration is corrected.");
+  }
 
   // Create and start Express app
   const app = createApp();
