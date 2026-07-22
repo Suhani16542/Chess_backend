@@ -17,7 +17,7 @@ export interface EmailResult {
 const sendEmail = async (
   options: SendEmailOptions
 ): Promise<EmailResult> => {
-  const { to, subject, html, replyTo } = options;
+  const { to, subject, html } = options;
 
   const recipients = Array.isArray(to)
     ? to.map((email) => ({ email }))
@@ -27,15 +27,18 @@ const sendEmail = async (
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
+        "accept": "application/json",
+        "content-type": "application/json",
         "api-key": env.BREVO_SMTP_KEY,
-        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "Chess Academy", email: env.BREVO_USER },
+        sender: {
+          name: "Chess Academy",
+          email: env.BREVO_USER,
+        },
         to: recipients,
         subject,
         htmlContent: html,
-        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
       }),
     });
 
