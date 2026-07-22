@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 import { logger } from "./logger";
 
-const secureMode = env.SMTP_PORT === 465;
+const secureMode = env.SMTP_SECURE || env.SMTP_PORT === 465;
 const connectionTimeout = env.SMTP_CONNECTION_TIMEOUT;
 const greetingTimeout = env.SMTP_GREETING_TIMEOUT;
 const socketTimeout = env.SMTP_SOCKET_TIMEOUT;
