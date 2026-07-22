@@ -30,31 +30,30 @@ const getNumberEnv = (key: string, fallback: number): number => {
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
-const rawSmtpPort = getEnv("SMTP_PORT");
-const parsedSmtpPort = parseInt(rawSmtpPort, 10);
-if (isNaN(parsedSmtpPort)) {
-  throw new Error(`SMTP_PORT is not a valid number: "${rawSmtpPort}"`);
-}
-
 export const env = {
   PORT: parseInt(getEnv("PORT", false) || "5000", 10),
   MONGODB_URI: getEnv("MONGODB_URI"),
-  SMTP_HOST: getEnv("SMTP_HOST"),
-  SMTP_PORT: parsedSmtpPort,
-  SMTP_USER: getEnv("SMTP_USER"),
-  SMTP_PASS: getEnv("SMTP_PASS"),
-  ACADEMY_EMAIL: getEnv("ACADEMY_EMAIL"),
+  BREVO_USER: getEnv("BREVO_USER"),
+  BREVO_SMTP_KEY: getEnv("BREVO_SMTP_KEY"),
+  NOTIFICATION_EMAIL: getEnv("NOTIFICATION_EMAIL"),
   NODE_ENV: getEnv("NODE_ENV", false) || "development",
-  SMTP_SECURE: getBooleanEnv("SMTP_SECURE", false),
-  SMTP_REQUIRE_TLS: getBooleanEnv("SMTP_REQUIRE_TLS", false),
-  SMTP_REJECT_UNAUTHORIZED: getBooleanEnv("SMTP_REJECT_UNAUTHORIZED", true),
-  SMTP_CONNECTION_TIMEOUT: getNumberEnv("SMTP_CONNECTION_TIMEOUT", 10000),
-  SMTP_GREETING_TIMEOUT: getNumberEnv("SMTP_GREETING_TIMEOUT", 10000),
-  SMTP_SOCKET_TIMEOUT: getNumberEnv("SMTP_SOCKET_TIMEOUT", 15000),
   isDev(): boolean {
     return this.NODE_ENV === "development";
   },
   isProd(): boolean {
     return this.NODE_ENV === "production";
+  },
+  // Backward compatibility getters for logs and internal calls
+  get SMTP_HOST(): string {
+    return "smtp-relay.brevo.com";
+  },
+  get SMTP_PORT(): number {
+    return 587;
+  },
+  get SMTP_SECURE(): boolean {
+    return false;
+  },
+  get ACADEMY_EMAIL(): string {
+    return this.NOTIFICATION_EMAIL;
   },
 };
