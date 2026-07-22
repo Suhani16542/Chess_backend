@@ -30,7 +30,7 @@ export const env = {
     return "smtp-relay.brevo.com";
   },
   get SMTP_PORT(): number {
-    return 587;
+    return 2587;
   },
   get SMTP_SECURE(): boolean {
     return false;
