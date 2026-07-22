@@ -2,24 +2,19 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 import { logger } from "./logger";
 
-const secureMode = env.SMTP_SECURE || env.SMTP_PORT === 465;
-const connectionTimeout = env.SMTP_CONNECTION_TIMEOUT;
-const greetingTimeout = env.SMTP_GREETING_TIMEOUT;
-const socketTimeout = env.SMTP_SOCKET_TIMEOUT;
-
 export const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  secure: secureMode,
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
   auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
-  connectionTimeout,
-  greetingTimeout,
-  socketTimeout,
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
   tls: {
-    rejectUnauthorized: env.SMTP_REJECT_UNAUTHORIZED,
+    rejectUnauthorized: false,
   },
 });
 
@@ -27,7 +22,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
   try {
     await transporter.verify();
     logger.info(
-      `[SMTP] Connection successful. Host: ${env.SMTP_HOST}; Port: ${env.SMTP_PORT}; Secure: ${String(secureMode)}; NodeEnv: ${env.NODE_ENV}`
+      `[SMTP] Connection successful. Host: ${process.env.SMTP_HOST}; Port: 587; Secure: false; NodeEnv: ${env.NODE_ENV}`
     );
     return true;
   } catch (error) {
@@ -48,9 +43,9 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
 
     const errorMessage = [
       `[SMTP] Connection failed.`,
-      `Host: ${env.SMTP_HOST}`,
-      `Port: ${env.SMTP_PORT}`,
-      `Secure: ${String(secureMode)}`,
+      `Host: ${process.env.SMTP_HOST}`,
+      `Port: 587`,
+      `Secure: false`,
       `NodeEnv: ${env.NODE_ENV}`,
       `message: ${smtpError.message}`,
       `code: ${smtpError.code ?? "unknown"}`,
@@ -68,3 +63,4 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     return false;
   }
 };
+
