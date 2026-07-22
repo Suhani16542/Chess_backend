@@ -3,26 +3,26 @@ import { env } from "./env";
 import { logger } from "./logger";
 
 export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  // 1. Agar ENV mein Host set nahi hai toh Direct Brevo Host use karega
+  host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
   port: 587,
-  secure: false,
+  secure: false, // Port 587 ke liye ALWAYS false
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    // 2. BREVO_USER / BREVO_SMTP_KEY ko fallback diya gaya hai
+    user: process.env.BREVO_USER || process.env.SMTP_USER,
+    pass: process.env.BREVO_SMTP_KEY || process.env.SMTP_PASS,
   },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-  tls: {
-    rejectUnauthorized: false,
-  },
+  // 3. Timeouts ko 30s se kam karke 10s kar diya gaya hai taaki lag na ho
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 export const verifySmtpConnection = async (): Promise<boolean> => {
   try {
     await transporter.verify();
     logger.info(
-      `[SMTP] Connection successful. Host: ${process.env.SMTP_HOST}; Port: 587; Secure: false; NodeEnv: ${env.NODE_ENV}`
+      `[SMTP] Connection successful. Host: ${process.env.SMTP_HOST || "smtp-relay.brevo.com"}; Port: 587; NodeEnv: ${env.NODE_ENV}`
     );
     return true;
   } catch (error) {
@@ -43,7 +43,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
 
     const errorMessage = [
       `[SMTP] Connection failed.`,
-      `Host: ${process.env.SMTP_HOST}`,
+      `Host: ${process.env.SMTP_HOST || "smtp-relay.brevo.com"}`,
       `Port: 587`,
       `Secure: false`,
       `NodeEnv: ${env.NODE_ENV}`,
@@ -63,4 +63,3 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     return false;
   }
 };
-
