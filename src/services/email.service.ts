@@ -1,4 +1,3 @@
-import { transporter } from "../config/nodemailer";
 import { env } from "../config/env";
 import { logger } from "../config/logger";
 
@@ -20,38 +19,37 @@ const sendEmail = async (
 ): Promise<EmailResult> => {
   const { to, subject, html, replyTo } = options;
 
+  const recipients = Array.isArray(to)
+    ? to.map((email) => ({ email }))
+    : [{ email: to }];
+
   try {
-    const info = await transporter.sendMail({
-      from: env.ACADEMY_EMAIL,
-      to,
-      subject,
-      html,
-      ...(replyTo ? { replyTo } : {}),
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": env.BREVO_SMTP_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: "Chess Academy", email: env.BREVO_USER },
+        to: recipients,
+        subject,
+        htmlContent: html,
+        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+      }),
     });
 
-    logger.info(`[EmailService] Email sent successfully. MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    const data = (await response.json()) as { messageId?: string; message?: string };
+
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    logger.info(`[EmailService] Email sent successfully. MessageId: ${data.messageId}`);
+    return { success: true, messageId: data.messageId };
   } catch (err) {
-    const error = err as Error & {
-      code?: string;
-      command?: string;
-      response?: unknown;
-      responseCode?: number;
-    };
-
-    const responseCode = error.responseCode ?? "n/a";
-    const responseMessage =
-      typeof error.response === "string"
-        ? error.response
-        : error.response
-          ? JSON.stringify(error.response)
-          : "n/a";
-
-    logger.error(
-      `[EmailService] SMTP sendMail failed. code: ${error.code ?? "unknown"} | command: ${error.command ?? "unknown"} | responseCode: ${responseCode} | response: ${responseMessage}`,
-      err
-    );
-
+    const error = err as Error;
+    logger.error(`[EmailService] Brevo API send failed. message: ${error.message}`, err);
     return { success: false, error: error.message };
   }
 };
@@ -68,4 +66,5 @@ export const sendUserConfirmationEmail = async (
   html: string,
   replyTo?: string
 ): Promise<EmailResult> => sendEmail({ to, subject, html, replyTo });
+
 
