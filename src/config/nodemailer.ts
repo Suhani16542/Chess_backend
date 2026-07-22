@@ -2,12 +2,10 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 import { logger } from "./logger";
 
-const secureMode = false;
-const requireTls = true;
-const ignoreTls = false;
-const connectionTimeout = 10000;
-const greetingTimeout = 10000;
-const socketTimeout = 15000;
+const secureMode = env.SMTP_PORT === 465;
+const connectionTimeout = env.SMTP_CONNECTION_TIMEOUT;
+const greetingTimeout = env.SMTP_GREETING_TIMEOUT;
+const socketTimeout = env.SMTP_SOCKET_TIMEOUT;
 
 export const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
@@ -20,8 +18,6 @@ export const transporter = nodemailer.createTransport({
   connectionTimeout,
   greetingTimeout,
   socketTimeout,
-  requireTLS: requireTls,
-  ignoreTLS: ignoreTls,
   tls: {
     rejectUnauthorized: env.SMTP_REJECT_UNAUTHORIZED,
   },
@@ -39,6 +35,8 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
       code?: string;
       command?: string;
       response?: unknown;
+      syscall?: string;
+      address?: string;
     };
 
     const responseText =
@@ -54,7 +52,10 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
       `Port: ${env.SMTP_PORT}`,
       `Secure: ${String(secureMode)}`,
       `NodeEnv: ${env.NODE_ENV}`,
+      `message: ${smtpError.message}`,
       `code: ${smtpError.code ?? "unknown"}`,
+      `syscall: ${smtpError.syscall ?? "unknown"}`,
+      `address: ${smtpError.address ?? "unknown"}`,
       `command: ${smtpError.command ?? "unknown"}`,
       `response: ${responseText}`,
     ].join(" | ");

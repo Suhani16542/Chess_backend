@@ -30,11 +30,17 @@ const getNumberEnv = (key: string, fallback: number): number => {
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const rawSmtpPort = getEnv("SMTP_PORT");
+const parsedSmtpPort = parseInt(rawSmtpPort, 10);
+if (isNaN(parsedSmtpPort)) {
+  throw new Error(`SMTP_PORT is not a valid number: "${rawSmtpPort}"`);
+}
+
 export const env = {
   PORT: parseInt(getEnv("PORT", false) || "5000", 10),
   MONGODB_URI: getEnv("MONGODB_URI"),
   SMTP_HOST: getEnv("SMTP_HOST"),
-  SMTP_PORT: parseInt(getEnv("SMTP_PORT"), 10),
+  SMTP_PORT: parsedSmtpPort,
   SMTP_USER: getEnv("SMTP_USER"),
   SMTP_PASS: getEnv("SMTP_PASS"),
   ACADEMY_EMAIL: getEnv("ACADEMY_EMAIL"),
