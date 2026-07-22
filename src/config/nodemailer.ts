@@ -4,7 +4,7 @@ import { logger } from "./logger";
 
 export const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
-  port: 587,
+  port: 2587,
   secure: false,
   auth: {
     user: env.BREVO_USER,
@@ -19,7 +19,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
   try {
     await transporter.verify();
     logger.info(
-      `[SMTP] Connection successful. Host: smtp-relay.brevo.com; Port: 587; Secure: false; NodeEnv: ${env.NODE_ENV}`
+      `[SMTP] Connection successful. Host: smtp-relay.brevo.com; Port: 2587; Secure: false; NodeEnv: ${env.NODE_ENV}`
     );
     return true;
   } catch (error) {
@@ -41,7 +41,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     const errorMessage = [
       `[SMTP] Connection failed.`,
       `Host: smtp-relay.brevo.com`,
-      `Port: 587`,
+      `Port: 2587`,
       `Secure: false`,
       `NodeEnv: ${env.NODE_ENV}`,
       `message: ${smtpError.message}`,
