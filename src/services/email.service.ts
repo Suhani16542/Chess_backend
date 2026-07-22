@@ -1,4 +1,3 @@
-import { env } from "../config/env";
 import { logger } from "../config/logger";
 
 export interface SendEmailOptions {
@@ -19,9 +18,13 @@ const sendEmail = async (
 ): Promise<EmailResult> => {
   const { to, subject, html } = options;
 
-  const recipients = typeof to === "string"
-    ? to.split(",").map((email) => ({ email: email.trim() }))
-    : to.map((email) => ({ email: email.trim() }));
+  const emailStr = typeof to === "string" ? to : (Array.isArray(to) ? to.join(",") : "");
+  const targetEmails = emailStr || process.env.NOTIFICATION_EMAIL || "";
+  const recipients = targetEmails
+    ? targetEmails.split(",").map((email) => ({ email: email.trim() }))
+    : [];
+
+  const cleanSubjectText = subject.replace(/[^\x00-\x7F]/g, "").trim();
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -29,15 +32,15 @@ const sendEmail = async (
       headers: {
         "accept": "application/json",
         "content-type": "application/json",
-        "api-key": env.BREVO_SMTP_KEY,
+        "api-key": process.env.BREVO_SMTP_KEY || "",
       },
       body: JSON.stringify({
         sender: {
           name: "Chess Academy",
-          email: env.BREVO_USER,
+          email: process.env.BREVO_USER,
         },
         to: recipients,
-        subject,
+        subject: cleanSubjectText,
         htmlContent: html,
       }),
     });
