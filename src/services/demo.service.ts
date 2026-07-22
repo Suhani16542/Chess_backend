@@ -48,7 +48,7 @@ export const createDemoLead = async (
 
   const adminResult = await sendAdminLeadEmail(
     academyEmails,
-    `♟ New Demo Request from ${input.studentName} — ${input.city}`,
+    `New Demo Request from ${input.studentName} — ${input.city}`,
     adminLeadTemplate({
       studentName: input.studentName,
       parentName: input.parentName,
@@ -65,7 +65,7 @@ export const createDemoLead = async (
 
   const userResult = await sendUserConfirmationEmail(
     input.email,
-    `✅ Demo Class Confirmed — ${input.studentName} | Chess Academy`,
+    `Demo Class Confirmed — ${input.studentName} | Chess Academy`,
     userConfirmationTemplate({
       studentName: input.studentName,
       parentName: input.parentName,
