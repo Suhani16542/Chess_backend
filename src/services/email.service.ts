@@ -19,9 +19,9 @@ const sendEmail = async (
 ): Promise<EmailResult> => {
   const { to, subject, html } = options;
 
-  const recipients = Array.isArray(to)
-    ? to.map((email) => ({ email }))
-    : [{ email: to }];
+  const recipients = typeof to === "string"
+    ? to.split(",").map((email) => ({ email: email.trim() }))
+    : to.map((email) => ({ email: email.trim() }));
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
